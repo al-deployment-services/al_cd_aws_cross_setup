@@ -18,16 +18,16 @@ Sample usage
 
 Arguments
 ----------
-*  -h, --help   show this help message and exit
-*  --user USER  User name / email address for API Authentication
-*  --pswd PSWD  Password for API Authentication
-*  --cid CID    Alert Logic Customer CID as target for this deployment
-*  --aws AWS    Customer AWS Account Number where IAM role is deployed
-*  --arn ARN    Cross Account IAM role arn
-*  --ext EXT    External ID specified in IAM role trust relationship
-*  --cred CRED  Credential name, free form label, not visible in Alert Logic UI
-*  --env ENV    Environment name, will be displayed in Alert Logic UI under Deployment
-*  --dc DC      Alert Logic Data center assignment, i.e. defender-us-denver, defender-us-ashburn or defender-uk-newport
+  -h, --help   show this help message and exit
+  --user USER  User name / email address for API Authentication
+  --pswd PSWD  Password for API Authentication
+  --cid CID    Alert Logic Customer CID as target for this deployment
+  --aws AWS    Customer AWS Account Number where IAM role is deployed
+  --arn ARN    Cross Account IAM role arn
+  --ext EXT    External ID specified in IAM role trust relationship
+  --cred CRED  Credential name, free form label, not visible in Alert Logic UI
+  --env ENV    Environment name, will be displayed in Alert Logic UI under Deployment
+  --dc DC      Alert Logic Data center assignment, i.e. defender-us-denver, defender-us-ashburn or defender-uk-newport
 
 License and Authors
 ===================
