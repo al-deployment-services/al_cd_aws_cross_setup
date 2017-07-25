@@ -18,8 +18,9 @@ Deployment Mode
 
 Sample ADD Usage
 ----------------
+Replace the parameters to match your environment and run this command ::
 
-`python al_cd_aws_cross_setup.py ADD --user first.last@company.com --pswd MyCloudInsightPassword --cid 10000 --aws 052672429986 --arn arn:aws:iam::052672429986:role/AlertLogicCrossAccountCD --ext My_ext_id --cred TestArgCred --env TestEnv --dc defender-us-ashburn`
+    python al_cd_aws_cross_setup.py ADD --user first.last@company.com --pswd MyCloudInsightPassword --cid 10000 --aws 052672429986 --arn arn:aws:iam::052672429986:role/AlertLogicCrossAccountCD --ext My_ext_id --cred TestArgCred --env TestEnv --dc defender-us-ashburn
 
 Arguments
 ----------
@@ -38,8 +39,9 @@ Take note of the output from the script, you will need to record the Environment
 
 Sample DEL Usage
 ----------------
+Replace the parameters to match your environment and run this command ::
 
-`python al_cd_aws_cross_setup.py DEL --user first.last@company.com --pswd MyCloudInsightPassword --cid 10000 --envid 833CE538-04B4-441F-8318-DBFCB9C9B39C`
+    python al_cd_aws_cross_setup.py DEL --user first.last@company.com --pswd MyCloudInsightPassword --cid 10000 --envid 833CE538-04B4-441F-8318-DBFCB9C9B39C
 
 Arguments
 ----------
