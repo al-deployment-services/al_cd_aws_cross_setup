@@ -23,6 +23,13 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 YARP_URL="api.cloudinsight.alertlogic.com"
 ALERT_LOGIC_CI_SOURCE = "https://api.cloudinsight.alertlogic.com/sources/v1/"
 
+#exit code standard:
+#0 = OK
+#1 = argument parser issue
+#2 = environment issue such as invalid environment id, invalid password, or invalid scope
+#3 = timeout
+EXIT_CODE = 0
+
 def authenticate(user, paswd, yarp):
 	#Authenticate with CI yarp to get token
 	url = yarp
@@ -129,6 +136,7 @@ def failback(token, cred_id, target_cid):
 
 #MAIN MODULE
 if __name__ == '__main__':
+	EXIT_CODE=0
 
 	parent_parser = argparse.ArgumentParser()
 	subparsers = parent_parser.add_subparsers(help="Select mode", dest="mode")
@@ -153,7 +161,11 @@ if __name__ == '__main__':
 	del_parser.add_argument("--cid", required=True, help="Alert Logic Customer CID where the environment belongs")
 	del_parser.add_argument("--envid", required=True, help="Environment ID that you wish to remove")	
 
-	args = parent_parser.parse_args()
+	try:
+		args = parent_parser.parse_args()
+	except:
+		EXIT_CODE = 1
+		sys.exit(EXIT_CODE)
 
 	#Set argument to variables
 	if args.mode == "ADD":
@@ -175,12 +187,19 @@ if __name__ == '__main__':
 		TARGET_CID = args.cid
 		TARGET_ENV_ID = args.envid
 		
-	
-	if args.mode == "ADD":
-		#Authenticate with Cloud Insight and retrieve token	
+	print ("### Starting script - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + " - Deployment Mode = " + str(args.mode) + " ###\n")
+
+	#Authenticate with Cloud Insight and retrieve token	
+	try:
 		TOKEN = str(authenticate(EMAIL_ADDRESS, PASSWORD, YARP_URL))
-		print ("Starting script - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + " - Deployment Mode = ADD \n")	
+	except:
+		print ("### Cannot Authenticate - check user name or password ###\n")
+		print ("\n### Script stopped - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + "###\n")
+		EXIT_CODE = 2
+		sys.exit(EXIT_CODE)
 		
+	if args.mode == "ADD":
+			
 		#Create credentials using the IAM role ARN and external ID	
 		CRED_PAYLOAD = prep_credentials(TARGET_IAM_ROLE_ARN, TARGET_EXT_ID, TARGET_CRED_NAME)
 		CRED_RESULT = post_credentials(TOKEN, str(json.dumps(CRED_PAYLOAD, indent=4)), TARGET_CID)
@@ -197,17 +216,16 @@ if __name__ == '__main__':
 				print ("Env ID : " + ENV_ID)
 				print ("\nCloud Defender Cross Account Role created successfully")
 			else:
+				EXIT_CODE=2
 				print ("Failed to create environment source, see response code + reason above, starting fallback ..")
 				failback(TOKEN, CRED_ID, TARGET_CID)
 
-		else:			
+		else:
+			EXIT_CODE=2
 			print ("Failed to create credentials, see response code + reason above, stopping ..")
 		
 	elif args.mode == "DEL":
-		#Authenticate with Cloud Insight and retrieve token	
-		TOKEN = str(authenticate(EMAIL_ADDRESS, PASSWORD, YARP_URL))
-		print ("Starting script - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + " - Deployment Mode = DEL \n")	
-
+		
 		#Check if the provided Environment ID exist and valid
 		SOURCE_RESULT = get_source_environment(TOKEN, TARGET_ENV_ID, TARGET_CID)
 		
@@ -221,4 +239,8 @@ if __name__ == '__main__':
 			del_source_credentials(TOKEN, TARGET_CRED_ID, TARGET_CID)
 
 		else:
+			EXIT_CODE=2
 			print ("Failed to find the environment ID, see response code + reason above, stopping ..")
+
+	print ("\n### Script stopped - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + "###\n")
+	sys.exit(EXIT_CODE)
