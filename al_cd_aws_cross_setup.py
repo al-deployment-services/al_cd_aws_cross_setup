@@ -48,24 +48,24 @@ def prep_credentials(iam_arn, iam_ext_id, cred_name):
 	RESULT['credential']  = {}
 	RESULT['credential']['name'] = str(cred_name)
 	RESULT['credential']['type'] = "iam_role"
-	RESULT['credential']['iam_role'] = {}	
+	RESULT['credential']['iam_role'] = {}
 	RESULT['credential']['iam_role']['arn'] = str(iam_arn)
-	RESULT['credential']['iam_role']['external_id'] = str(iam_ext_id)	
+	RESULT['credential']['iam_role']['external_id'] = str(iam_ext_id)
 	return RESULT
 
 def post_credentials(token, payload, target_cid):
 	#Call API with method POST to create new credentials, return the credential ID
 	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/credentials/"
-	REQUEST = requests.post(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False, data=payload)	
+	REQUEST = requests.post(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False, data=payload)
 	print ("Create Credentials Status : " + str(REQUEST.status_code), str(REQUEST.reason))
-	if REQUEST.status_code == 201:		
+	if REQUEST.status_code == 201:
 		RESULT = json.loads(REQUEST.text)
-	else:		
+	else:
 		RESULT = {}
 		RESULT['credential']  = {}
-		RESULT['credential']['id'] = "n/a"		
+		RESULT['credential']['id'] = "n/a"
 	return RESULT
-	
+
 def prep_source_environment(aws_account, cred_id, environment_name, defender_location):
 	#Setup dictionary for environment payload
 	RESULT = {}
@@ -86,16 +86,30 @@ def prep_source_environment(aws_account, cred_id, environment_name, defender_loc
 	RESULT['source']['product_type'] = "outcomes"
 	RESULT['source']['tags'] = []
 	RESULT['source']['type'] = "environment"
-	return RESULT	
+	return RESULT
 
 def post_source_environment(token, payload, target_cid):
 	#Call API with method POST to create new environment
 	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/sources/"
-	REQUEST = requests.post(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False, data=payload)	
-	print ("Create Environment Status : " + str(REQUEST.status_code), str(REQUEST.reason))	
-	if REQUEST.status_code == 201:		
+	REQUEST = requests.post(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False, data=payload)
+	print ("Create Environment Status : " + str(REQUEST.status_code), str(REQUEST.reason))
+	if REQUEST.status_code == 201:
 		RESULT = json.loads(REQUEST.text)
-	else:		
+	else:
+		RESULT = {}
+		RESULT['source'] = {}
+		RESULT['source']['id'] = "n/a"
+	return RESULT
+
+def list_source_environments(token, target_cid):
+	#Get the source environment detail
+	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/sources/"
+	REQUEST = requests.get(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)
+
+	print ("Retrieving Environment info status : " + str(REQUEST.status_code), str(REQUEST.reason), file=sys.stderr)
+	if REQUEST.status_code == 200:
+		RESULT = json.loads(REQUEST.text)
+	else:
 		RESULT = {}
 		RESULT['source'] = {}
 		RESULT['source']['id'] = "n/a"
@@ -103,25 +117,19 @@ def post_source_environment(token, payload, target_cid):
 
 def del_source_environment(token, target_env, target_cid):
 	#Delete the specified environment by environment ID and CID
-	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/sources/" + target_env	
-	REQUEST = requests.delete(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)		
+	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/sources/" + target_env
+	REQUEST = requests.delete(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)
 	print ("Delete Environment Status : " + str(REQUEST.status_code), str(REQUEST.reason))
 
-def del_source_credentials(token, target_cred, target_cid):
-	#Delete the specified credentials by credentials ID and CID
-	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/credentials/" + target_cred	
-	REQUEST = requests.delete(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)		
-	print ("Delete Credentials Status : " + str(REQUEST.status_code), str(REQUEST.reason))
-	
 def get_source_environment(token, target_env, target_cid):
 	#Get the source environment detail
 	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/sources/" + target_env
-	REQUEST = requests.get(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)	
-	
-	print ("Retrieving Environment info status : " + str(REQUEST.status_code), str(REQUEST.reason))	
-	if REQUEST.status_code == 200:		
+	REQUEST = requests.get(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)
+
+	print ("Retrieving Environment info status : " + str(REQUEST.status_code), str(REQUEST.reason))
+	if REQUEST.status_code == 200:
 		RESULT = json.loads(REQUEST.text)
-	else:		
+	else:
 		RESULT = {}
 		RESULT['source'] = {}
 		RESULT['source']['id'] = "n/a"
@@ -130,7 +138,7 @@ def get_source_environment(token, target_env, target_cid):
 def failback(token, cred_id, target_cid):
 	#Failback, delete credentials if create environment failed
 	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/credentials/" + cred_id
-	REQUEST = requests.delete(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)	
+	REQUEST = requests.delete(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)
 	print ("Delete Credentials Status : " + str(REQUEST.status_code), str(REQUEST.reason))
 	print ("Failback completed")
 
@@ -143,7 +151,8 @@ if __name__ == '__main__':
 	#Add parser for both ADD and DELETE mode
 	add_parser = subparsers.add_parser("ADD", help="Create new environment")
 	del_parser = subparsers.add_parser("DEL", help="Delete environment")
-	
+	list_parser = subparsers.add_parser("LIST", help="List environments")
+
 	#Parser argumetn for ADD
 	add_parser.add_argument("--user", required=True, help="User name / email address for API Authentication")
 	add_parser.add_argument("--pswd", required=True, help="Password for API Authentication")
@@ -159,7 +168,12 @@ if __name__ == '__main__':
 	del_parser.add_argument("--user", required=True, help="User name / email address for API Authentication")
 	del_parser.add_argument("--pswd", required=True, help="Password for API Authentication")
 	del_parser.add_argument("--cid", required=True, help="Alert Logic Customer CID where the environment belongs")
-	del_parser.add_argument("--envid", required=True, help="Environment ID that you wish to remove")	
+	del_parser.add_argument("--envid", required=True, help="Environment ID that you wish to remove")
+
+	#Parser argumetn for LIST
+	list_parser.add_argument("--user", required=True, help="User name / email address for API Authentication")
+	list_parser.add_argument("--pswd", required=True, help="Password for API Authentication")
+	list_parser.add_argument("--cid", required=True, help="Alert Logic Customer CID where the environment belongs")
 
 	try:
 		args = parent_parser.parse_args()
@@ -169,9 +183,9 @@ if __name__ == '__main__':
 
 	#Set argument to variables
 	if args.mode == "ADD":
-				
-		EMAIL_ADDRESS = args.user 
-		PASSWORD = args.pswd 
+
+		EMAIL_ADDRESS = args.user
+		PASSWORD = args.pswd
 		TARGET_CID = args.cid
 		TARGET_AWS_ACCOUNT = args.aws
 		TARGET_IAM_ROLE_ARN = args.arn
@@ -179,17 +193,22 @@ if __name__ == '__main__':
 		TARGET_CRED_NAME = args.cred
 		TARGET_ENV_NAME = args.env
 		TARGET_DEFENDER = args.dc
-			
-	elif args.mode == "DEL":		
-			
-		EMAIL_ADDRESS = args.user 
-		PASSWORD = args.pswd 
+
+	elif args.mode == "DEL":
+
+		EMAIL_ADDRESS = args.user
+		PASSWORD = args.pswd
 		TARGET_CID = args.cid
 		TARGET_ENV_ID = args.envid
-		
-	print ("### Starting script - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + " - Deployment Mode = " + str(args.mode) + " ###\n")
+	elif args.mode == "LIST":
 
-	#Authenticate with Cloud Insight and retrieve token	
+		EMAIL_ADDRESS = args.user
+		PASSWORD = args.pswd
+		TARGET_CID = args.cid
+
+	print ("### Starting script - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + " - Deployment Mode = " + str(args.mode) + " ###\n", file=sys.stderr)
+
+	#Authenticate with Cloud Insight and retrieve token
 	try:
 		TOKEN = str(authenticate(EMAIL_ADDRESS, PASSWORD, YARP_URL))
 	except:
@@ -197,15 +216,15 @@ if __name__ == '__main__':
 		print ("\n### Script stopped - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + "###\n")
 		EXIT_CODE = 2
 		sys.exit(EXIT_CODE)
-		
+
 	if args.mode == "ADD":
-			
-		#Create credentials using the IAM role ARN and external ID	
+
+		#Create credentials using the IAM role ARN and external ID
 		CRED_PAYLOAD = prep_credentials(TARGET_IAM_ROLE_ARN, TARGET_EXT_ID, TARGET_CRED_NAME)
 		CRED_RESULT = post_credentials(TOKEN, str(json.dumps(CRED_PAYLOAD, indent=4)), TARGET_CID)
 		CRED_ID = str(CRED_RESULT['credential']['id'])
 
-		if CRED_ID != "n/a":		
+		if CRED_ID != "n/a":
 			print ("Cred ID : " + CRED_ID)
 			#Create new environment using credentials ID and target AWS Account number
 			ENV_PAYLOAD = prep_source_environment(TARGET_AWS_ACCOUNT, CRED_ID, TARGET_ENV_NAME, TARGET_DEFENDER)
@@ -223,12 +242,15 @@ if __name__ == '__main__':
 		else:
 			EXIT_CODE=2
 			print ("Failed to create credentials, see response code + reason above, stopping ..")
-		
+
+	elif args.mode == "LIST":
+		SOURCE_RESULT = list_source_environments(TOKEN, TARGET_CID)
+		print(json.dumps(SOURCE_RESULT))
 	elif args.mode == "DEL":
-		
+
 		#Check if the provided Environment ID exist and valid
 		SOURCE_RESULT = get_source_environment(TOKEN, TARGET_ENV_ID, TARGET_CID)
-		
+
 		if SOURCE_RESULT["source"]["id"] != "n/a":
 			TARGET_CRED_ID = SOURCE_RESULT["source"]["config"]["aws"]["credential"]["id"]
 			print ("Env ID : " + TARGET_ENV_ID)
@@ -242,5 +264,5 @@ if __name__ == '__main__':
 			EXIT_CODE=2
 			print ("Failed to find the environment ID, see response code + reason above, stopping ..")
 
-	print ("\n### Script stopped - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + "###\n")
+	print ("\n### Script stopped - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + "###\n", file=sys.stderr)
 	sys.exit(EXIT_CODE)
