@@ -2,7 +2,7 @@ Wrapper for AWS Cross Account Deployment in Alert Logic (Threat Manager)
 =================
 This script will create the Threat Manager AWS Cross Account role link setup. Two components that will be created:
 
-- New Credentials based on the provided IAM role + external ID 
+- New Credentials based on the provided IAM role + external ID
 - New Source based on the given credentials and AWS Account ID
 
 Requirements
@@ -30,7 +30,7 @@ Arguments
   --cid CID    Alert Logic Customer CID as target for this deployment
   --aws AWS    Customer AWS Account Number where IAM role is deployed
   --arn ARN    Cross Account IAM role arn
-  --ext EXT    External ID specified in IAM role trust relationship
+  --ext EXT    External ID specified in IAM role trust relationship (value must equal to CID)
   --cred CRED  Credential name, free form label, not visible in Alert Logic UI
   --env ENV    Environment name, will be displayed in Alert Logic UI under Deployment
   --dc DC      Alert Logic Data center assignment, i.e. defender-us-denver, defender-us-ashburn or defender-uk-newport
@@ -58,7 +58,7 @@ If you going to integrate this script to another orchestration tool, you can use
 * 0 = script run successfully
 * 1 = missing or invalid argument
 * 2 = environment issue such as invalid environment id, invalid password, or invalid scope
-* 3 = timeout 
+* 3 = timeout
 
 WARNING: This script will not revert back any changes due to timeout, any commands / API calls that it executed prior to timeout will run until completed, even if the script exit due to timeout.
 
@@ -67,5 +67,5 @@ License and Authors
 License:
 Distributed under the Apache 2.0 license.
 
-Authors: 
+Authors:
 Welly Siauw (welly.siauw@alertlogic.com)
