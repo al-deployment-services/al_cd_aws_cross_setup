@@ -3,6 +3,7 @@ Wrapper for AWS Cross Account Deployment in Alert Logic (Threat Manager)
 This script will create the Threat Manager AWS Cross Account role link setup. Two components that will be created:
 
 - New Credentials based on the provided IAM role + external ID
+- (Optional) New Credentials to use for centralized CloudTrail support based on the provided IAM role + external ID
 - New Source based on the given credentials and AWS Account ID
 
 Requirements
@@ -22,6 +23,12 @@ Replace the parameters to match your environment and run this command ::
 
     python al_cd_aws_cross_setup.py ADD --user first.last@company.com --pswd MyCloudInsightPassword --cid 10000 --aws 052672429986 --arn arn:aws:iam::052672429986:role/AlertLogicCrossAccountCD --ext My_ext_id --cred TestArgCred --env TestEnv --dc defender-us-ashburn
 
+Sample ADD Usage w/centralized cloudtrail
+----------------
+Replace the parameters to match your environment and run this command ::
+
+   python al_cd_aws_cross_setup.py ADD --user first.last@company.com --pswd MyCloudInsightPassword --cid 10000 --aws 052672429986 --arn arn:aws:iam::052672429986:role/AlertLogicCrossAccountCD --ext My_ext_id --cred TestArgCred --x_arn arn:aws:iam::288627028134:role/AlertLogicCentralizedCTCrossAccountCD --x_ext My_ext_id --x_cred centralizedTestArgCred --env TestEnv --dc defender-us-ashburn
+
 Arguments
 ----------
   -h, --help   show this help message and exit
@@ -32,6 +39,9 @@ Arguments
   --arn ARN    Cross Account IAM role arn
   --ext EXT    External ID specified in IAM role trust relationship (value must equal to CID)
   --cred CRED  Credential name, free form label, not visible in Alert Logic UI
+  --x_arn X_ARN Cross Account IAM role arn for centralized CloudTrail
+  --x_ext x_EXT External ID specified in IAM role trust relationship for the centralized account
+  --x_cred X_CRED Centralized account credential name, free form label, not visible in Alert Logic UI
   --env ENV    Environment name, will be displayed in Alert Logic UI under Deployment
   --dc DC      Alert Logic Data center assignment, i.e. defender-us-denver, defender-us-ashburn or defender-uk-newport
 
