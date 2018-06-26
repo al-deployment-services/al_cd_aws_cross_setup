@@ -31,19 +31,19 @@ Replace the parameters to match your environment and run this command ::
 
 Arguments
 ----------
-  -h, --help   show this help message and exit
-  --user USER  User name / email address for API Authentication
-  --pswd PSWD  Password for API Authentication
-  --cid CID    Alert Logic Customer CID as target for this deployment
-  --aws AWS    Customer AWS Account Number where IAM role is deployed
-  --arn ARN    Cross Account IAM role arn
-  --ext EXT    External ID specified in IAM role trust relationship (value must equal to CID)
-  --cred CRED  Credential name, free form label, not visible in Alert Logic UI
-  --x_arn X_ARN Cross Account IAM role arn for centralized CloudTrail
-  --x_ext x_EXT External ID specified in IAM role trust relationship for the centralized account
-  --x_cred X_CRED Centralized account credential name, free form label, not visible in Alert Logic UI
-  --env ENV    Environment name, will be displayed in Alert Logic UI under Deployment
-  --dc DC      Alert Logic Data center assignment, i.e. defender-us-denver, defender-us-ashburn or defender-uk-newport
+  -h, --help       show this help message and exit
+  --user USER      User name / email address for API Authentication
+  --pswd PSWD      Password for API Authentication
+  --cid CID        Alert Logic Customer CID as target for this deployment
+  --aws AWS        Customer AWS Account Number where IAM role is deployed
+  --arn ARN        Cross Account IAM role arn
+  --ext EXT        External ID specified in IAM role trust relationship (value must equal to CID)
+  --cred CRED      Credential name, free form label, not visible in Alert Logic UI
+  --x_arn          Cross Account IAM role arn for centralized CloudTrail
+  --x_ext          External ID specified in IAM role trust relationship for the centralized account
+  --x_cred         Centralized account credential name, free form label, not visible in Alert Logic UI
+  --env ENV        Environment name, will be displayed in Alert Logic UI under Deployment
+  --dc DC          Alert Logic Data center assignment, i.e. defender-us-denver, defender-us-ashburn or defender-uk-newport
 
 Take note of the output from the script, you will need to record the Environment ID if you wish to delete it later using this script (see below)
 
