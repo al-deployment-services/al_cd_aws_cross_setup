@@ -77,6 +77,7 @@ def post_credentials(token, payload, target_cid):
 		RESULT['credential']['id'] = "n/a"
 	return RESULT
 
+
 def prep_source_environment(aws_account, cred_id, x_cred_id, environment_name, defender_location):
 	#Setup dictionary for environment payload
 	RESULT = {}
@@ -114,6 +115,20 @@ def post_source_environment(token, payload, target_cid):
 	REQUEST = requests.post(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False, data=payload)
 	print ("Create Environment Status : " + str(REQUEST.status_code), str(REQUEST.reason))
 	if REQUEST.status_code == 201:
+		RESULT = json.loads(REQUEST.text)
+	else:
+		RESULT = {}
+		RESULT['source'] = {}
+		RESULT['source']['id'] = "n/a"
+	return RESULT
+
+def list_source_environments(token, target_cid):
+	#Get the source environment detail
+	API_ENDPOINT = ALERT_LOGIC_CI_SOURCE + target_cid + "/sources/"
+	REQUEST = requests.get(API_ENDPOINT, headers={'x-aims-auth-token': token}, verify=False)
+
+	print ("Retrieving Environment info status : " + str(REQUEST.status_code), str(REQUEST.reason), file=sys.stderr)
+	if REQUEST.status_code == 200:
 		RESULT = json.loads(REQUEST.text)
 	else:
 		RESULT = {}
@@ -167,6 +182,7 @@ if __name__ == '__main__':
 	#Add parser for both ADD and DELETE mode
 	add_parser = subparsers.add_parser("ADD", help="Create new environment")
 	del_parser = subparsers.add_parser("DEL", help="Delete environment")
+	list_parser = subparsers.add_parser("LIST", help="List environments")
 
 	#Parser argumetn for ADD
 	add_parser.add_argument("--user", required=True, help="User name / email address for API Authentication")
@@ -187,6 +203,11 @@ if __name__ == '__main__':
 	del_parser.add_argument("--pswd", required=True, help="Password for API Authentication")
 	del_parser.add_argument("--cid", required=True, help="Alert Logic Customer CID where the environment belongs")
 	del_parser.add_argument("--envid", required=True, help="Environment ID that you wish to remove")
+
+	#Parser argumetn for LIST
+	list_parser.add_argument("--user", required=True, help="User name / email address for API Authentication")
+	list_parser.add_argument("--pswd", required=True, help="Password for API Authentication")
+	list_parser.add_argument("--cid", required=True, help="Alert Logic Customer CID where the environment belongs")
 
 	try:
 		args = parent_parser.parse_args()
@@ -217,7 +238,13 @@ if __name__ == '__main__':
 		TARGET_CID = args.cid
 		TARGET_ENV_ID = args.envid
 
-	print ("### Starting script - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + " - Deployment Mode = " + str(args.mode) + " ###\n")
+	elif args.mode == "LIST":
+
+		EMAIL_ADDRESS = args.user
+		PASSWORD = args.pswd
+		TARGET_CID = args.cid
+
+	print ("### Starting script - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + " - Deployment Mode = " + str(args.mode) + " ###\n", file=sys.stderr)
 
 	#Authenticate with Cloud Insight and retrieve token
 	try:
@@ -261,6 +288,10 @@ if __name__ == '__main__':
 			EXIT_CODE=2
 			print ("Failed to create credentials, see response code + reason above, stopping ..")
 
+	elif args.mode == "LIST":
+		SOURCE_RESULT = list_source_environments(TOKEN, TARGET_CID)
+		print(json.dumps(SOURCE_RESULT))
+
 	elif args.mode == "DEL":
 
 		#Check if the provided Environment ID exist and valid
@@ -284,5 +315,5 @@ if __name__ == '__main__':
 			EXIT_CODE=2
 			print ("Failed to find the environment ID, see response code + reason above, stopping ..")
 
-	print ("\n### Script stopped - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + "###\n")
+	print ("\n### Script stopped - " + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")) + "###\n", file=sys.stderr)
 	sys.exit(EXIT_CODE)
