@@ -231,7 +231,7 @@ if __name__ == '__main__':
     add_parser.add_argument("--arn", required=True,
                             help="Cross Account IAM role arn")
     add_parser.add_argument(
-        "--ext", required=True, help="External ID specified in IAM role trust relationship")
+        "--ext", required=True, help="External ID for IAM trust relationship, must be the target account's CID")
     add_parser.add_argument(
         "--cred", required=True, help="Credential name, free form label, not visible in Alert Logic UI")
     add_parser.add_argument("--x_arn", required=False,
@@ -331,6 +331,8 @@ if __name__ == '__main__':
             print("Cred ID : " + CRED_ID)
             if args.x_arn is not None:
                 print("X_Cred ID : " + X_CRED_ID)
+            else:
+                X_CRED_ID = None
             # Create new environment using credentials ID and target AWS Account number
             ENV_PAYLOAD = prep_source_environment(
                 TARGET_AWS_ACCOUNT, CRED_ID, X_CRED_ID, TARGET_ENV_NAME, TARGET_DEFENDER)
